@@ -10,6 +10,16 @@ defmodule Adventofcode.Day02ProgramAlarm do
     |> hd()
   end
 
+  def part_2(input) do
+    for(
+      noun <- 0..99,
+      verb <- 0..99,
+      part_1(input, noun, verb) == 19_690_720,
+      do: 100 * noun + verb
+    )
+    |> hd()
+  end
+
   def run(program, position \\ 0)
 
   def run({:halt, program}, _position), do: program
