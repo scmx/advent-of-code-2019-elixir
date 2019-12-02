@@ -1,11 +1,11 @@
 defmodule Adventofcode.Day02ProgramAlarm do
   use Adventofcode
 
-  def part_1(input) do
+  def part_1(input, noun \\ 12, verb \\ 2) do
     input
     |> parse()
-    |> List.update_at(1, fn _ -> 12 end)
-    |> List.update_at(2, fn _ -> 2 end)
+    |> List.update_at(1, fn _ -> noun end)
+    |> List.update_at(2, fn _ -> verb end)
     |> run()
     |> hd()
   end
