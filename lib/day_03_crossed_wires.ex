@@ -7,26 +7,45 @@ defmodule Adventofcode.Day03CrossedWires do
     closest_intersection_distance(input)
   end
 
+  def part_2(input) do
+    fewest_combined_steps_to_intersection(input)
+  end
+
   def closest_intersection_distance(input) do
     input
     |> Parser.parse()
     |> Twister.twist()
     |> intersections()
+    |> Map.keys()
+    |> Enum.map(&manhattan_distance({0, 0}, &1))
+    |> Enum.min()
+  end
+
+  def fewest_combined_steps_to_intersection(input) do
+    input
+    |> Parser.parse()
+    |> Twister.twist()
+    |> intersections()
+    |> Map.values()
+    |> Enum.min()
   end
 
   defp intersections(state) do
-    wire1 = Enum.at(state.wires, 0).visited
-    wire2 = Enum.at(state.wires, 1).visited
+    wire1 = Enum.at(state.wires, 0)
+    wire2 = Enum.at(state.wires, 1)
 
-    MapSet.intersection(wire1, wire2)
-    |> Enum.map(&manhattan_distance({0, 0}, &1))
-    |> Enum.min()
+    positions1 = MapSet.new(Map.keys(wire1.visited))
+    positions2 = MapSet.new(Map.keys(wire2.visited))
+
+    MapSet.intersection(positions1, positions2)
+    |> Enum.map(&{&1, wire1.visited[&1] + wire2.visited[&1]})
+    |> Enum.into(%{})
   end
 
   def manhattan_distance({x1, y1}, {x2, y2}), do: abs(x1 - x2) + abs(y1 - y2)
 
   defmodule Wire do
-    defstruct position: {0, 0}, visited: MapSet.new(), instructions: []
+    defstruct position: {0, 0}, visited: %{}, instructions: [], steps: 0
   end
 
   defmodule CentralPort do
@@ -50,7 +69,14 @@ defmodule Adventofcode.Day03CrossedWires do
       |> Enum.flat_map(&split_instruction/1)
       |> Enum.reduce(wire, fn instruction, wire ->
         next_pos = move(wire.position, instruction)
-        %{wire | position: next_pos, visited: MapSet.put(wire.visited, next_pos)}
+        steps = wire.steps + 1
+
+        %{
+          wire
+          | position: next_pos,
+            visited: Map.put(wire.visited, next_pos, steps),
+            steps: steps
+        }
       end)
     end
 
@@ -94,7 +120,10 @@ defmodule Adventofcode.Day03CrossedWires do
     end
 
     defp has_visited(wire, {x, y}) do
-      MapSet.member?(wire.visited, {x, y})
+      wire.visited
+      |> Map.keys()
+      |> MapSet.new()
+      |> MapSet.member?({x, y})
     end
   end
 

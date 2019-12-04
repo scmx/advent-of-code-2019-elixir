@@ -4,7 +4,6 @@ defmodule Adventofcode.Day03CrossedWiresTest do
   import Adventofcode.Day03CrossedWires
   import ExUnit.CaptureIO
 
-  alias Adventofcode.Day03CrossedWires
   alias Adventofcode.Day03CrossedWires.{CentralPort, Parser, Printer, Twister, Wire}
 
   describe "Parser.parse/1" do
@@ -59,13 +58,14 @@ defmodule Adventofcode.Day03CrossedWiresTest do
   end
 
   describe "part_1/1" do
-    @tag :skip
-    test "" do
-      assert 1337 = "R8,U5,L5,D3" |> part_1()
-    end
-
     test_with_puzzle_input do
-      assert 1337 = puzzle_input() |> part_1()
+      assert 303 = puzzle_input() |> part_1()
+    end
+  end
+
+  describe "part_2/1" do
+    test_with_puzzle_input do
+      assert 11222 = puzzle_input() |> part_2()
     end
   end
 
