@@ -3,17 +3,17 @@ defmodule Adventofcode.Day04SecureContainerTest do
 
   import Adventofcode.Day04SecureContainer
 
-  describe "valid_password?" do
+  describe "valid_part_1?" do
     test "111111 meets these criteria (double 11, never decreases)" do
-      assert "111111" |> valid_password?()
+      assert "111111" |> valid_part_1?()
     end
 
     test "223450 does not meet these criteria (decreasing pair of digits 50)" do
-      refute "223450" |> valid_password?()
+      refute "223450" |> valid_part_1?()
     end
 
     test "123789 does not meet these criteria (no double)" do
-      refute "123789" |> valid_password?()
+      refute "123789" |> valid_part_1?()
     end
   end
 
