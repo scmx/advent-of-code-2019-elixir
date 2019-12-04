@@ -17,9 +17,29 @@ defmodule Adventofcode.Day04SecureContainerTest do
     end
   end
 
+  describe "valid_part_2?" do
+    test "112233 meets these criteria" do
+      assert "112233" |> valid_part_2?()
+    end
+
+    test "123444 no longer meets the criteria" do
+      refute "123444" |> valid_part_2?()
+    end
+
+    test "111122 meets the criteria (even though 1 is repeated more than twice" do
+      assert "111122" |> valid_part_2?()
+    end
+  end
+
   describe "part_1/1" do
     test_with_puzzle_input do
       assert 475 = puzzle_input() |> part_1()
+    end
+  end
+
+  describe "part_2/1" do
+    test_with_puzzle_input do
+      assert 297 = puzzle_input() |> part_2()
     end
   end
 end

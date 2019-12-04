@@ -8,10 +8,23 @@ defmodule Adventofcode.Day04SecureContainer do
     |> Enum.count()
   end
 
+  def part_2(input) do
+    input
+    |> parse_range()
+    |> Enum.filter(&valid_part_2?/1)
+    |> Enum.count()
+  end
+
   def valid_part_1?(input) do
     input
     |> prepare_password()
     |> (&(increases?(&1) && has_double?(&1))).()
+  end
+
+  def valid_part_2?(input) do
+    input
+    |> prepare_password()
+    |> (&(increases?(&1) && has_separate_double?(&1))).()
   end
 
   defp parse_range(input) do
@@ -37,4 +50,13 @@ defmodule Adventofcode.Day04SecureContainer do
   defp has_double?([x]), do: false
   defp has_double?([x, x | rest]), do: true
   defp has_double?([x, y | rest]), do: has_double?([y | rest])
+
+  defp has_separate_double?([]), do: false
+  defp has_separate_double?([x]), do: false
+  defp has_separate_double?([x, x, x, x, x | rest]), do: false
+  defp has_separate_double?([x, x, x, x | rest]), do: has_separate_double?(rest)
+  defp has_separate_double?([x, x, x | rest]), do: has_separate_double?(rest)
+  defp has_separate_double?([x, x | rest]), do: true
+  defp has_separate_double?([x, y]), do: false
+  defp has_separate_double?([x, y | rest]), do: has_separate_double?([y | rest])
 end
