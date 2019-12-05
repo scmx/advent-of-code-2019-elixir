@@ -32,21 +32,24 @@ defmodule Adventofcode.IntcodeComputer do
       %{program | addresses: List.update_at(program.addresses, position, fn _ -> value end)}
     end
 
-    def jump(program, distance) do
-      %{program | position: program.position + distance}
+    def jump(program, position) do
+      %{program | position: position}
     end
 
     def parse_instruction(program) do
-      [opcode, arg1, arg2, arg3 | _] = Enum.drop(program.addresses, program.position)
-      [mode1, mode2, mode3] = parse_modes(opcode)
+      [opcode | args] = Enum.drop(program.addresses, program.position)
+      modes = parse_modes(opcode)
+      params = build_params(args, modes)
 
-      params = [
-        Parameter.new(arg1, mode1),
-        Parameter.new(arg2, mode2),
-        Parameter.new(arg3, mode3)
-      ]
+      opcode
+      |> rem(100)
+      |> prepare_instruction(params)
+    end
 
-      parse_opcode(opcode, params)
+    defp build_params(args, modes) do
+      [args, modes]
+      |> List.zip()
+      |> Enum.map(fn {arg, mode} -> Parameter.new(arg, mode) end)
     end
 
     defp parse_modes(opcode) do
@@ -59,14 +62,32 @@ defmodule Adventofcode.IntcodeComputer do
       |> Enum.map(&String.to_integer/1)
     end
 
-    defp parse_opcode(opcode, [param1, param2, param3]) do
-      case rem(opcode, 100) do
-        1 -> {:add, [param1, param2, param3]}
-        2 -> {:multiply, [param1, param2, param3]}
-        3 -> {:store, [param1]}
-        4 -> {:output, [param1]}
-        99 -> {:halt, []}
-      end
+    defp prepare_instruction(1, [param1, param2, param3]) do
+      {:add, [param1, param2, param3]}
+    end
+
+    defp prepare_instruction(2, [param1, param2, param3]) do
+      {:multiply, [param1, param2, param3]}
+    end
+
+    defp prepare_instruction(3, [param1 | _]) do
+      {:store, [param1]}
+    end
+
+    defp prepare_instruction(4, [param1 | _]) do
+      {:output, [param1]}
+    end
+
+    defp prepare_instruction(99, _args) do
+      {:halt, []}
+    end
+
+    def input(program, value) do
+      %{program | input: value}
+    end
+
+    def output(program, value) do
+      %{program | output: value}
     end
   end
 
@@ -85,20 +106,35 @@ defmodule Adventofcode.IntcodeComputer do
 
     def add(program, [param1, param2, param3]) do
       result = value(program, param1) + value(program, param2)
-      Program.put(program, param3, result)
+
+      program
+      |> Program.put(param3, result)
+      |> Program.jump(program.position + 4)
     end
 
     def multiply(program, [param1, param2, param3]) do
       result = value(program, param1) * value(program, param2)
-      Program.put(program, param3, result)
+
+      program
+      |> Program.put(param3, result)
+      |> Program.jump(program.position + 4)
     end
 
+    # Opcode 3 takes a single integer as input and saves it to the address given
+    # by its only parameter. For example, the instruction 3,50 would take an
+    # input value and store it at address 50.
     def store(program, [param1]) do
-      Program.put(program, param1, program.input)
+      program
+      |> Program.put(param1, program.input)
+      |> Program.jump(program.position + 2)
     end
 
+    # Opcode 4 outputs the value of its only parameter. For example, the
+    # instruction 4,50 would output the value at address 50.
     def output(program, [param1]) do
-      %{program | output: value(program, param1)}
+      program
+      |> Program.output(value(program, param1))
+      |> Program.jump(program.position + 2)
     end
   end
 
@@ -108,7 +144,6 @@ defmodule Adventofcode.IntcodeComputer do
     {instruction, args} = Program.parse_instruction(program)
 
     apply(Computer, instruction, [program, args])
-    |> Program.jump(1 + length(args))
     |> run()
   end
 
