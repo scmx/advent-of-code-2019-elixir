@@ -1,15 +1,16 @@
 defmodule Adventofcode.Day02ProgramAlarm do
   use Adventofcode
 
-  import Adventofcode.IntcodeComputer
+  alias Adventofcode.IntcodeComputer
+  alias Adventofcode.IntcodeComputer.Program
 
   def part_1(input, noun \\ 12, verb \\ 2) do
     input
-    |> parse()
-    |> List.update_at(1, fn _ -> noun end)
-    |> List.update_at(2, fn _ -> verb end)
-    |> run()
-    |> hd()
+    |> IntcodeComputer.parse()
+    |> Program.put(1, noun)
+    |> Program.put(2, verb)
+    |> IntcodeComputer.run()
+    |> Program.get(0)
   end
 
   def part_2(input) do
