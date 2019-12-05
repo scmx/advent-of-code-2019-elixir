@@ -78,6 +78,22 @@ defmodule Adventofcode.IntcodeComputer do
       {:output, [param1]}
     end
 
+    defp prepare_instruction(5, [param1, param2 | _]) do
+      {:jump_if_true, [param1, param2]}
+    end
+
+    defp prepare_instruction(6, [param1, param2 | _]) do
+      {:jump_if_false, [param1, param2]}
+    end
+
+    defp prepare_instruction(7, [param1, param2, param3]) do
+      {:less_than, [param1, param2, param3]}
+    end
+
+    defp prepare_instruction(8, [param1, param2, param3]) do
+      {:equals, [param1, param2, param3]}
+    end
+
     defp prepare_instruction(99, _args) do
       {:halt, []}
     end
@@ -135,6 +151,68 @@ defmodule Adventofcode.IntcodeComputer do
       program
       |> Program.output(value(program, param1))
       |> Program.jump(program.position + 2)
+    end
+
+    # Opcode 5 is jump-if-true: if the first parameter is non-zero, it sets the
+    # instruction pointer to the value from the second parameter. Otherwise, it
+    # does nothing.
+    def jump_if_true(program, [param1, param2]) do
+      position =
+        if value(program, param1) == 0 do
+          program.position + 3
+        else
+          value(program, param2)
+        end
+
+      program
+      |> Program.jump(position)
+    end
+
+    # Opcode 6 is jump-if-false: if the first parameter is zero, it sets the
+    # instruction pointer to the value from the second parameter. Otherwise, it
+    # does nothing.
+    def jump_if_false(program, [param1, param2]) do
+      position =
+        if value(program, param1) == 0 do
+          value(program, param2)
+        else
+          program.position + 3
+        end
+
+      program
+      |> Program.jump(position)
+    end
+
+    # Opcode 7 is less than: if the first parameter is less than the second
+    # parameter, it stores 1 in the position given by the third parameter.
+    # Otherwise, it stores 0.
+    def less_than(program, [param1, param2, param3]) do
+      result =
+        if value(program, param1) < value(program, param2) do
+          1
+        else
+          0
+        end
+
+      program
+      |> Program.put(param3, result)
+      |> Program.jump(program.position + 4)
+    end
+
+    # Opcode 8 is equals: if the first parameter is equal to the second
+    # parameter, it stores 1 in the position given by the third parameter.
+    # Otherwise, it stores 0.
+    def equals(program, [param1, param2, param3]) do
+      result =
+        if value(program, param1) == value(program, param2) do
+          1
+        else
+          0
+        end
+
+      program
+      |> Program.put(param3, result)
+      |> Program.jump(program.position + 4)
     end
   end
 
