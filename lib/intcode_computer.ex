@@ -63,6 +63,8 @@ defmodule Adventofcode.IntcodeComputer do
       case rem(opcode, 100) do
         1 -> {:add, [param1, param2, param3]}
         2 -> {:multiply, [param1, param2, param3]}
+        3 -> {:store, [param1]}
+        4 -> {:output, [param1]}
         99 -> {:halt, []}
       end
     end
@@ -89,6 +91,14 @@ defmodule Adventofcode.IntcodeComputer do
     def multiply(program, [param1, param2, param3]) do
       result = value(program, param1) * value(program, param2)
       Program.put(program, param3, result)
+    end
+
+    def store(program, [param1]) do
+      Program.put(program, param1, program.input)
+    end
+
+    def output(program, [param1]) do
+      %{program | output: value(program, param1)}
     end
   end
 
