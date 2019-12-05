@@ -1,7 +1,7 @@
 defmodule Adventofcode.Day02ProgramAlarmTest do
   use Adventofcode.FancyCase
 
-  import Adventofcode.Day02ProgramAlarm
+  import Adventofcode.{Day02ProgramAlarm, IntcodeComputer}
 
   describe "parse/1" do
     test "parses 1,0,0,0,99" do
