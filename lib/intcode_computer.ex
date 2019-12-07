@@ -16,7 +16,12 @@ defmodule Adventofcode.IntcodeComputer do
 
   defmodule Program do
     @enforce_keys [:addresses]
-    defstruct addresses: [], inputs: [], position: 0, halt: false, output: nil
+    defstruct addresses: [],
+              position: 0,
+              status: :idle,
+              output: nil,
+              inputs: [],
+              fallback_input: 0
 
     def new(addresses) do
       %__MODULE__{addresses: addresses}
@@ -37,7 +42,11 @@ defmodule Adventofcode.IntcodeComputer do
       put(program, parameter, input)
     end
 
-    def shift_input(%Program{inputs: [input]} = program), do: {input, program}
+    def shift_input(%Program{inputs: [], fallback_input: nil} = program) do
+      {program.fallback_input, program |> Map.put(:status, :waiting)}
+    end
+
+    def shift_input(%Program{inputs: []} = program), do: {program.fallback_input, program}
 
     def shift_input(%Program{inputs: [input | inputs]} = program) do
       {input, %{program | inputs: inputs}}
@@ -109,8 +118,16 @@ defmodule Adventofcode.IntcodeComputer do
       {:halt, []}
     end
 
-    def input(program, value) do
-      %{program | inputs: [value | program.inputs]}
+    def input(program, nil) do
+      program
+    end
+
+    def input(program, value) when is_number(value) do
+      %{program | inputs: program.inputs ++ [value]}
+    end
+
+    def fallback_input(program, value) do
+      %{program | fallback_input: value}
     end
 
     def output(program, value) do
@@ -129,7 +146,7 @@ defmodule Adventofcode.IntcodeComputer do
       value
     end
 
-    def halt(program, []), do: %{program | halt: true}
+    def halt(program, []), do: %{program | status: :halted}
 
     def add(program, [param1, param2, param3]) do
       result = value(program, param1) + value(program, param2)
@@ -150,6 +167,10 @@ defmodule Adventofcode.IntcodeComputer do
     # Opcode 3 takes a single integer as input and saves it to the address given
     # by its only parameter. For example, the instruction 3,50 would take an
     # input value and store it at address 50.
+    def store(%{inputs: [], fallback_input: nil} = program, [_param1]) do
+      %{program | status: :waiting}
+    end
+
     def store(program, [param1]) do
       program
       |> Program.shift_input_and_put_into(param1)
@@ -227,7 +248,15 @@ defmodule Adventofcode.IntcodeComputer do
     end
   end
 
-  def run(%Program{halt: true} = program), do: program
+  def run(%Program{status: :halted} = program), do: program
+
+  def run(%Program{status: :waiting} = program) do
+    %{program | status: :idle}
+  end
+
+  def run(%Program{status: :idle} = program) do
+    run(%{program | status: :running})
+  end
 
   def run(program) do
     {instruction, args} = Program.parse_instruction(program)
