@@ -33,8 +33,6 @@ defmodule Adventofcode.Day03CrossedWiresTest do
 
       result = capture_io(fun)
 
-      IO.puts(result)
-
       assert result === @output
     end
   end
