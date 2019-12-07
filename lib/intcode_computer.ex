@@ -15,11 +15,11 @@ defmodule Adventofcode.IntcodeComputer do
   end
 
   defmodule Program do
-    @enforce_keys [:addresses, :input]
-    defstruct addresses: [], input: 1, position: 0, halt: false, output: nil
+    @enforce_keys [:addresses]
+    defstruct addresses: [], inputs: [], position: 0, halt: false, output: nil
 
-    def new(addresses, input \\ 1) do
-      %__MODULE__{addresses: addresses, input: input}
+    def new(addresses) do
+      %__MODULE__{addresses: addresses}
     end
 
     def get(program, position) do
@@ -30,6 +30,17 @@ defmodule Adventofcode.IntcodeComputer do
 
     def put(program, position, value) do
       %{program | addresses: List.update_at(program.addresses, position, fn _ -> value end)}
+    end
+
+    def shift_input_and_put_into(program, parameter) do
+      {input, program} = shift_input(program)
+      put(program, parameter, input)
+    end
+
+    def shift_input(%Program{inputs: [input]} = program), do: {input, program}
+
+    def shift_input(%Program{inputs: [input | inputs]} = program) do
+      {input, %{program | inputs: inputs}}
     end
 
     def jump(program, position) do
@@ -99,7 +110,7 @@ defmodule Adventofcode.IntcodeComputer do
     end
 
     def input(program, value) do
-      %{program | input: value}
+      %{program | inputs: [value | program.inputs]}
     end
 
     def output(program, value) do
@@ -141,7 +152,7 @@ defmodule Adventofcode.IntcodeComputer do
     # input value and store it at address 50.
     def store(program, [param1]) do
       program
-      |> Program.put(param1, program.input)
+      |> Program.shift_input_and_put_into(param1)
       |> Program.jump(program.position + 2)
     end
 

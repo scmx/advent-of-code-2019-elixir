@@ -7,6 +7,7 @@ defmodule Adventofcode.Day05SunnyAsteroids do
   def part_1(input) do
     input
     |> IntcodeComputer.parse()
+    |> Program.input(1)
     |> IntcodeComputer.run()
     |> IntcodeComputer.output()
   end

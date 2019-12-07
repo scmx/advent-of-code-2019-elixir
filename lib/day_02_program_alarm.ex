@@ -7,6 +7,7 @@ defmodule Adventofcode.Day02ProgramAlarm do
   def part_1(input, noun \\ 12, verb \\ 2) do
     input
     |> IntcodeComputer.parse()
+    |> Program.input(1)
     |> Program.put(1, noun)
     |> Program.put(2, verb)
     |> IntcodeComputer.run()
