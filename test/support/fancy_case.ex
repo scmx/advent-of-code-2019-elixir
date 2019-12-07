@@ -37,7 +37,7 @@ defmodule Adventofcode.FancyCase do
       [32, 5, 10]
   """
   def sigil_i(data, []) do
-    ~r/\d+/
+    ~r/-?\d+/
     |> Regex.scan(data)
     |> List.flatten()
     |> Enum.map(&String.to_integer/1)
