@@ -4,16 +4,23 @@ defmodule Adventofcode.Day06UniversalOrbitMap do
   alias __MODULE__.{Parser, Orbits}
 
   def part_1(input) do
-    total_number_of_direct_and_indirect_orbits(input)
+    input
+    |> total_number_of_direct_and_indirect_orbits()
     |> Orbits.total()
   end
 
-  defmodule Orbits do
-    @enforce_keys [:map]
-    defstruct map: %{}, direct: 0, indirect: 0
+  def part_2(input) do
+    input
+    |> minimum_number_of_orbital_transfers_required()
+    |> Orbits.distance("YOU", "SAN")
+  end
 
-    def new(map) do
-      %__MODULE__{map: map}
+  defmodule Orbits do
+    @enforce_keys [:paths, :map]
+    defstruct paths: [], map: %{}, direct: 0, indirect: 0, transfers: %{}
+
+    def new({paths, map}) do
+      %__MODULE__{paths: paths, map: map}
     end
 
     def count(orbits) do
@@ -55,6 +62,33 @@ defmodule Adventofcode.Day06UniversalOrbitMap do
     def total(orbits) do
       orbits.direct + orbits.indirect
     end
+
+    def follow(orbits) do
+      transfers =
+        orbits.paths
+        |> Enum.map(&{Enum.at(&1, 1), follow_path(&1, orbits)})
+
+      %{orbits | transfers: Enum.into(transfers, %{})}
+    end
+
+    def follow_path([c | _] = path, orbits) do
+      case get(orbits, c) do
+        nil -> path
+        d -> follow_path([d | path], orbits)
+      end
+    end
+
+    def distance(orbits, a, b) do
+      a = Map.get(orbits.transfers, a)
+      b = Map.get(orbits.transfers, b)
+      do_distance(a, b)
+    end
+
+    defp do_distance([x | a], [x | b]), do: do_distance(a, b)
+
+    defp do_distance(a, b) do
+      length(a) + length(b) - 2
+    end
   end
 
   defmodule Parser do
@@ -63,14 +97,23 @@ defmodule Adventofcode.Day06UniversalOrbitMap do
       |> String.trim_trailing()
       |> String.split("\n")
       |> Enum.map(&parse_line/1)
+      |> build_paths_and_map()
+    end
+
+    defp build_paths_and_map(paths) do
+      {paths, build_map(paths)}
+    end
+
+    defp build_map(paths) do
+      paths
+      |> Enum.map(&Enum.reverse/1)
+      |> Enum.map(&List.to_tuple/1)
       |> Enum.into(%{})
     end
 
     defp parse_line(line) do
       line
       |> String.split(")")
-      |> Enum.reverse()
-      |> List.to_tuple()
     end
   end
 
@@ -79,5 +122,12 @@ defmodule Adventofcode.Day06UniversalOrbitMap do
     |> Parser.parse()
     |> Orbits.new()
     |> Orbits.count()
+  end
+
+  def minimum_number_of_orbital_transfers_required(input) do
+    input
+    |> Parser.parse()
+    |> Orbits.new()
+    |> Orbits.follow()
   end
 end
