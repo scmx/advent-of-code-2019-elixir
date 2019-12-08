@@ -42,4 +42,21 @@ defmodule Adventofcode.FancyCase do
     |> List.flatten()
     |> Enum.map(&String.to_integer/1)
   end
+
+  @doc """
+  Custom sigil that trims leading whitespace same amount for each line
+  """
+  def sigil_h(text, []) do
+    lines = text |> String.trim_leading("\n") |> String.split("\n")
+
+    indentation_width =
+      lines
+      |> Enum.map(&Enum.at(String.split(&1, ~r/[^ ]/), 0))
+      |> Enum.map(&String.length/1)
+      |> Enum.min()
+
+    lines
+    |> Enum.map(&String.slice(&1, indentation_width..-1))
+    |> Enum.join("\n")
+  end
 end
