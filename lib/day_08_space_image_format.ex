@@ -1,6 +1,10 @@
 defmodule Adventofcode.Day08SpaceImageFormat do
   use Adventofcode
 
+  @black 0
+  @white 1
+  @transparent 2
+
   def part_1(input, {width, height}) do
     input
     |> least_corrupted_layer({width, height})
@@ -11,7 +15,7 @@ defmodule Adventofcode.Day08SpaceImageFormat do
     |> String.graphemes()
     |> Enum.map(&String.to_integer/1)
     |> Enum.chunk_every(width * height)
-    |> Enum.min_by(&count(&1, 0))
+    |> Enum.min_by(&count(&1, @black))
     |> sum_ones_and_twos()
   end
 
@@ -21,6 +25,6 @@ defmodule Adventofcode.Day08SpaceImageFormat do
   end
 
   def sum_ones_and_twos(layer) do
-    count(layer, 1) * count(layer, 2)
+    count(layer, @white) * count(layer, @transparent)
   end
 end
