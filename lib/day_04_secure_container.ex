@@ -43,20 +43,20 @@ defmodule Adventofcode.Day04SecureContainer do
     |> Enum.map(&String.to_integer/1)
   end
 
-  defp increases?([x]), do: true
-  defp increases?([x, y | rest]) when x > y, do: false
-  defp increases?([x, y | rest]), do: increases?([y | rest])
+  defp increases?([_]), do: true
+  defp increases?([x, y | _]) when x > y, do: false
+  defp increases?([_, y | rest]), do: increases?([y | rest])
 
-  defp has_double?([x]), do: false
-  defp has_double?([x, x | rest]), do: true
-  defp has_double?([x, y | rest]), do: has_double?([y | rest])
+  defp has_double?([_]), do: false
+  defp has_double?([x, x | _]), do: true
+  defp has_double?([_, y | rest]), do: has_double?([y | rest])
 
   defp has_separate_double?([]), do: false
-  defp has_separate_double?([x]), do: false
-  defp has_separate_double?([x, x, x, x, x | rest]), do: false
+  defp has_separate_double?([_]), do: false
+  defp has_separate_double?([x, x, x, x, x | _]), do: false
   defp has_separate_double?([x, x, x, x | rest]), do: has_separate_double?(rest)
   defp has_separate_double?([x, x, x | rest]), do: has_separate_double?(rest)
-  defp has_separate_double?([x, x | rest]), do: true
-  defp has_separate_double?([x, y]), do: false
-  defp has_separate_double?([x, y | rest]), do: has_separate_double?([y | rest])
+  defp has_separate_double?([x, x | _]), do: true
+  defp has_separate_double?([_x, _y]), do: false
+  defp has_separate_double?([_, y | rest]), do: has_separate_double?([y | rest])
 end

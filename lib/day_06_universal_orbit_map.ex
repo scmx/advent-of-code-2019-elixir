@@ -27,7 +27,7 @@ defmodule Adventofcode.Day06UniversalOrbitMap do
       Enum.reduce(orbits.map, orbits, &count_direct/2)
     end
 
-    defp count_direct({b, a}, orbits) do
+    defp count_direct({b, _a}, orbits) do
       case get(orbits, b) do
         nil ->
           orbits
