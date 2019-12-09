@@ -63,8 +63,14 @@ defmodule Adventofcode.IntcodeComputer do
       %{program | position: position}
     end
 
+    def raw_instruction(program, position, amount) do
+      position..(position + amount)
+      |> Enum.to_list()
+      |> Enum.map(&get(program, &1))
+    end
+
     def parse_instruction(%{position: position} = program) do
-      [opcode | args] = position..(position + 3) |> Enum.to_list() |> Enum.map(&get(program, &1))
+      [opcode | args] = raw_instruction(program, position, 3)
       modes = parse_modes(opcode)
       params = build_params(args, modes)
 
