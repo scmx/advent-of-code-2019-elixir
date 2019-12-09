@@ -11,4 +11,12 @@ defmodule Adventofcode.Day09SensorBoost do
     |> IntcodeComputer.run()
     |> IntcodeComputer.output()
   end
+
+  def part_2(input) do
+    input
+    |> IntcodeComputer.parse()
+    |> Program.input(2)
+    |> IntcodeComputer.run()
+    |> IntcodeComputer.output()
+  end
 end
