@@ -18,7 +18,7 @@ defmodule Adventofcode.IntcodeComputer do
 
   defmodule Program do
     @enforce_keys [:addresses]
-    defstruct addresses: [],
+    defstruct addresses: %{},
               position: 0,
               status: :idle,
               output: nil,
@@ -30,8 +30,8 @@ defmodule Adventofcode.IntcodeComputer do
       %__MODULE__{addresses: addresses}
     end
 
-    def get(program, position) do
-      Enum.at(program.addresses, position)
+    def get(program, position) when position >= 0 do
+      Map.get(program.addresses, position, 0)
     end
 
     def put(program, %Parameter{mode: :relative, value: position}, val) do
@@ -41,7 +41,7 @@ defmodule Adventofcode.IntcodeComputer do
     def put(program, %Parameter{value: position}, value), do: put(program, position, value)
 
     def put(program, position, value) do
-      %{program | addresses: List.update_at(program.addresses, position, fn _ -> value end)}
+      %{program | addresses: Map.put(program.addresses, position, value)}
     end
 
     def shift_input_and_put_into(program, parameter) do
@@ -63,8 +63,8 @@ defmodule Adventofcode.IntcodeComputer do
       %{program | position: position}
     end
 
-    def parse_instruction(program) do
-      [opcode | args] = Enum.drop(program.addresses, program.position)
+    def parse_instruction(%{position: position} = program) do
+      [opcode | args] = position..(position + 3) |> Enum.to_list() |> Enum.map(&get(program, &1))
       modes = parse_modes(opcode)
       params = build_params(args, modes)
 
