@@ -291,10 +291,18 @@ defmodule Adventofcode.IntcodeComputer do
     |> run()
   end
 
-  def parse(input) do
+  def parse(input) when is_binary(input) do
     input
     |> String.split(",")
     |> Enum.map(&String.to_integer/1)
+    |> parse()
+  end
+
+  def parse(input) when is_list(input) do
+    input
+    |> Enum.with_index()
+    |> Enum.map(fn {val, pos} -> {pos, val} end)
+    |> Enum.into(%{})
     |> Program.new()
   end
 
