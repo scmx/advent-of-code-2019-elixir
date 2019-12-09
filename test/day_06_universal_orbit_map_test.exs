@@ -20,8 +20,7 @@ defmodule Adventofcode.Day06UniversalOrbitMapTest do
     K)L
     """
     test "suppose you have the following map" do
-      assert %Orbits{direct: 11, indirect: 31} =
-               @input |> total_number_of_direct_and_indirect_orbits()
+      assert %Orbits{direct: 11, indirect: 31} = @input |> new()
     end
   end
 
@@ -47,7 +46,7 @@ defmodule Adventofcode.Day06UniversalOrbitMapTest do
                  "YOU" => ["COM", "B", "C", "D", "E", "J", "K", "YOU"],
                  "SAN" => ["COM", "B", "C", "D", "I", "SAN"]
                }
-             } = @input |> minimum_number_of_orbital_transfers_required()
+             } = @input |> new()
     end
   end
 
@@ -65,7 +64,7 @@ defmodule Adventofcode.Day06UniversalOrbitMapTest do
     test "suppose you have the following map" do
       assert 4 =
                @input
-               |> minimum_number_of_orbital_transfers_required()
+               |> new()
                |> Orbits.distance("YOU", "SAN")
     end
   end
