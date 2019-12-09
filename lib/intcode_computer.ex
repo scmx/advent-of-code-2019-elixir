@@ -8,8 +8,10 @@ defmodule Adventofcode.IntcodeComputer do
 
     def new(value, 0), do: new(value, :positional)
     def new(value, 1), do: new(value, :immediate)
+    def new(value, 2), do: new(value, :relative)
     def new(value, :positional = mode), do: do_new(value, mode)
     def new(value, :immediate = mode), do: do_new(value, mode)
+    def new(value, :relative = mode), do: do_new(value, mode)
 
     defp do_new(value, mode), do: %__MODULE__{value: value, mode: mode}
   end
@@ -21,7 +23,8 @@ defmodule Adventofcode.IntcodeComputer do
               status: :idle,
               output: nil,
               inputs: [],
-              fallback_input: 0
+              fallback_input: 0,
+              relative_base: 0
 
     def new(addresses) do
       %__MODULE__{addresses: addresses}
@@ -29,6 +32,10 @@ defmodule Adventofcode.IntcodeComputer do
 
     def get(program, position) do
       Enum.at(program.addresses, position)
+    end
+
+    def put(program, %Parameter{mode: :relative, value: position}, val) do
+      put(program, position + program.relative_base, val)
     end
 
     def put(program, %Parameter{value: position}, value), do: put(program, position, value)
@@ -114,6 +121,10 @@ defmodule Adventofcode.IntcodeComputer do
       {:equals, [param1, param2, param3]}
     end
 
+    defp prepare_instruction(9, [param1 | _]) do
+      {:adjust_relative_base, [param1]}
+    end
+
     defp prepare_instruction(99, _args) do
       {:halt, []}
     end
@@ -144,6 +155,10 @@ defmodule Adventofcode.IntcodeComputer do
 
     def value(_program, %Parameter{value: value, mode: :immediate}) do
       value
+    end
+
+    def value(program, %Parameter{value: position, mode: :relative}) do
+      Program.get(program, position + program.relative_base)
     end
 
     def halt(program, []), do: %{program | status: :halted}
@@ -245,6 +260,17 @@ defmodule Adventofcode.IntcodeComputer do
       program
       |> Program.put(param3, result)
       |> Program.jump(program.position + 4)
+    end
+
+    # Opcode 9 adjusts the relative base by the value of its only parameter. The
+    # relative base increases (or decreases, if the value is negative) by the
+    # value of the parameter.
+    def adjust_relative_base(program, [param1]) do
+      relative_base = program.relative_base + value(program, param1)
+
+      program
+      |> Map.put(:relative_base, relative_base)
+      |> Program.jump(program.position + 2)
     end
   end
 
