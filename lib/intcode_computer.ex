@@ -144,13 +144,9 @@ defmodule Adventofcode.IntcodeComputer do
     def output(program, value) do
       %{program | outputs: [value | program.outputs]}
     end
-  end
-
-  defmodule Computer do
-    alias Adventofcode.IntcodeComputer.{Parameter, Program}
 
     def value(program, %Parameter{value: position, mode: :positional}) do
-      Program.get(program, position)
+      get(program, position)
     end
 
     def value(_program, %Parameter{value: value, mode: :immediate}) do
@@ -158,8 +154,14 @@ defmodule Adventofcode.IntcodeComputer do
     end
 
     def value(program, %Parameter{value: position, mode: :relative}) do
-      Program.get(program, position + program.relative_base)
+      get(program, position + program.relative_base)
     end
+  end
+
+  defmodule Computer do
+    alias Adventofcode.IntcodeComputer.Program
+
+    import Program, only: [value: 2]
 
     def halt(program, []), do: %{program | status: :halted}
 
