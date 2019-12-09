@@ -48,14 +48,14 @@ defmodule Adventofcode.Day07AmplificationCircuit do
 
   def do_run_with_feedback({_, %Program{status: :halted}} = result), do: result
 
-  def do_run_with_feedback({programs, %Program{output: output}}) do
+  def do_run_with_feedback({programs, previous}) do
     programs
-    |> Enum.map_reduce(output, &run/2)
+    |> Enum.map_reduce(IntcodeComputer.output(previous), &run/2)
     |> do_run_with_feedback()
   end
 
-  defp run(program, %Program{output: output}) do
-    run(program, output)
+  defp run(program, %Program{} = previous) do
+    run(program, IntcodeComputer.output(previous))
   end
 
   defp run(program, output) do

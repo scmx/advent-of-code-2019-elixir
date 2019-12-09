@@ -21,7 +21,7 @@ defmodule Adventofcode.IntcodeComputer do
     defstruct addresses: %{},
               position: 0,
               status: :idle,
-              output: nil,
+              outputs: [],
               inputs: [],
               fallback_input: 0,
               relative_base: 0
@@ -142,7 +142,7 @@ defmodule Adventofcode.IntcodeComputer do
     end
 
     def output(program, value) do
-      %{program | output: value}
+      %{program | outputs: [value | program.outputs]}
     end
   end
 
@@ -306,7 +306,8 @@ defmodule Adventofcode.IntcodeComputer do
     |> Program.new()
   end
 
-  def output(program) do
-    program.output
-  end
+  def output(%{outputs: []}), do: nil
+  def output(%{outputs: [output | _]}), do: output
+
+  def outputs(program), do: Enum.reverse(program.outputs)
 end
