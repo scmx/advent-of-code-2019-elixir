@@ -5,6 +5,8 @@ defmodule Adventofcode.Day11SpacePolice do
   alias __MODULE__.{Hull, Printer, Runner, Turner}
   alias Adventofcode.IntcodeComputer
 
+  require Logger
+
   def part_1(input) do
     input
     |> IntcodeComputer.parse()
@@ -29,7 +31,7 @@ defmodule Adventofcode.Day11SpacePolice do
 
     @default_view {0..0, 0..0}
 
-    defstruct panels: %{}, robot: {{0, 0}, "^"}, view: @default_view, program: nil
+    defstruct panels: %{}, robot: {{0, 0}, "^"}, view: @default_view, program: nil, debug: false
 
     def new(program) do
       %Hull{program: program}
@@ -49,6 +51,7 @@ defmodule Adventofcode.Day11SpacePolice do
       hull
       |> Painter.paint_panel(paint_instruction)
       |> Turner.turn_and_move_robot(turn_instruction)
+      |> sleep_if_debug()
       |> run(rest)
     end
 
@@ -64,15 +67,28 @@ defmodule Adventofcode.Day11SpacePolice do
     end
 
     def painted_panels(%__MODULE__{panels: panels}), do: Map.size(panels)
+
+    defp sleep_if_debug(%{debug: false} = hull), do: hull
+
+    defp sleep_if_debug(hull) do
+      :timer.sleep(100)
+      hull
+    end
   end
 
   defmodule Runner do
+    def run(%{program: %{status: :halted}, debug: true} = hull) do
+      Logger.debug(inspect(hull))
+      hull
+    end
+
     def run(%{program: %{status: :halted}} = hull), do: hull
 
     def run(hull) do
       hull
       |> Map.put(:program, run_program(hull))
       |> Hull.run()
+      |> Printer.print_if_debug()
       |> run()
     end
 
@@ -114,6 +130,14 @@ defmodule Adventofcode.Day11SpacePolice do
   end
 
   defmodule Printer do
+    def print_if_debug(%{debug: true} = hull), do: print(hull)
+    def print_if_debug(hull), do: hull
+
+    def debug(hull) do
+      Logger.debug(inspect(Hull.painted_panels(hull)) <> "\n" <> s_print(hull))
+      hull
+    end
+
     def print(hull) do
       IO.puts(s_print(hull))
       hull
