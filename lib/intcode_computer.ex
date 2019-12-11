@@ -50,7 +50,7 @@ defmodule Adventofcode.IntcodeComputer do
     end
 
     def shift_input(%Program{inputs: [], fallback_input: nil} = program) do
-      {program.fallback_input, program |> Map.put(:status, :waiting)}
+      {program.fallback_input, %{program | status: :waiting}}
     end
 
     def shift_input(%Program{inputs: []} = program), do: {program.fallback_input, program}
@@ -314,8 +314,20 @@ defmodule Adventofcode.IntcodeComputer do
     |> Program.new()
   end
 
+  def input(program, input) do
+    Program.input(program, input)
+  end
+
+  def fallback_input(program, input) do
+    Program.fallback_input(program, input)
+  end
+
   def output(%{outputs: []}), do: nil
   def output(%{outputs: [output | _]}), do: output
 
   def outputs(program), do: Enum.reverse(program.outputs)
+
+  def pop_outputs(program) do
+    {outputs(program), %{program | outputs: []}}
+  end
 end
