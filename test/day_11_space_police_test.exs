@@ -112,4 +112,18 @@ defmodule Adventofcode.Day11SpacePoliceTest do
       assert 2511 = puzzle_input() |> part_1()
     end
   end
+
+  describe "part_2/1" do
+    @expected """
+    .#..#...##.#..#...##.#..#..##..###..#..#...
+    .#..#....#.#.#.....#.#.#..#..#.#..#.#..#...
+    .####....#.##......#.##...#....#..#.####...
+    .#..#....#.#.#.....#.#.#..#.##.###..#..#...
+    .#..#.#..#.#.#..#..#.#.#..#..#.#....#..#.>.
+    .#..#..##..#..#..##..#..#..###.#....#..#...
+    """
+    test_with_puzzle_input do
+      assert @expected = capture_io(fn -> puzzle_input() |> part_2() end)
+    end
+  end
 end

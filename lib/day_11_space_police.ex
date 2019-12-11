@@ -14,6 +14,16 @@ defmodule Adventofcode.Day11SpacePolice do
     |> Hull.painted_panels()
   end
 
+  def part_2(input) do
+    input
+    |> IntcodeComputer.parse()
+    |> IntcodeComputer.input(1)
+    |> IntcodeComputer.fallback_input(nil)
+    |> Hull.new()
+    |> Runner.run()
+    |> Printer.print()
+  end
+
   defmodule Hull do
     alias Day.Painter
 
