@@ -38,12 +38,21 @@ defmodule Adventofcode.Day12NBodyProblem do
     |> Planet.total_energy()
   end
 
+  def part_2(input) do
+    input
+    |> Parser.parse()
+    |> Planet.simulate_step_repeat(1000)
+    |> Planet.step()
+  end
+
   defmodule Moon do
     defstruct pos: {0, 0, 0}, vel: {0, 0, 0}
   end
 
   defmodule Planet do
     defstruct step: 0, moons: []
+
+    def step(%Planet{step: step}), do: step
 
     def simulate_step(%Planet{step: step} = planet, step), do: planet
 
@@ -53,6 +62,28 @@ defmodule Adventofcode.Day12NBodyProblem do
       |> Position.update_moons()
       |> Map.update!(:step, &(&1 + 1))
       |> simulate_step(until_step)
+    end
+
+    def simulate_step_repeat(planet), do: simulate_step_repeat(planet, MapSet.new())
+
+    def simulate_step_repeat(planet, previous) do
+      entry = Planet.serialize(planet)
+
+      if MapSet.member?(previous, entry) && planet.step > 0 do
+        planet
+      else
+        previous = MapSet.put(previous, entry)
+
+        planet
+        |> simulate_step(planet.step + 1)
+        |> simulate_step_repeat(previous)
+      end
+    end
+
+    def serialize(planet) do
+      planet.moons
+      |> Enum.map(&{&1.pos, &1.vel})
+      |> List.to_tuple()
     end
 
     def total_energy(planet) do

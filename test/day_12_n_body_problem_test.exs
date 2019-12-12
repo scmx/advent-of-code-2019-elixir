@@ -68,6 +68,10 @@ defmodule Adventofcode.Day12NBodyProblemTest do
     test "total_energy after 10 steps" do
       assert 179 = @input |> Parser.parse() |> Planet.simulate_step(10) |> Planet.total_energy()
     end
+
+    test "steps until repeat" do
+      assert %Planet{step: 2772} = @input |> Parser.parse() |> Planet.simulate_step_repeat()
+    end
   end
 
   describe "here's a second example" do
@@ -79,6 +83,11 @@ defmodule Adventofcode.Day12NBodyProblemTest do
     """
     test "total_energy after 100 steps" do
       assert 1940 = @input |> Parser.parse() |> Planet.simulate_step(100) |> Planet.total_energy()
+    end
+
+    @tag :skip
+    test "steps until repeat" do
+      assert %Planet{step: 0} = @input |> Parser.parse() |> Planet.simulate_step_repeat()
     end
   end
 
