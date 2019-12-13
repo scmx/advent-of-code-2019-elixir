@@ -3,7 +3,7 @@ defmodule Adventofcode.Day13CarePackage do
 
   alias Adventofcode.IntcodeComputer
 
-  alias __MODULE__.{ArcadeCabinet, Tiles}
+  alias __MODULE__.{ArcadeCabinet, Printer, Tiles}
 
   require Logger
 
@@ -54,6 +54,12 @@ defmodule Adventofcode.Day13CarePackage do
       |> draw(rest)
     end
 
+    def get_panel(%__MODULE__{tiles: tiles}, {x, y}) do
+      Map.get(tiles, {x, y}, 0)
+    end
+
+    def get_ball(%__MODULE__{}), do: nil
+
     defp parse_tile(0), do: :empty
     defp parse_tile(1), do: :wall
     defp parse_tile(2), do: :block
@@ -81,5 +87,40 @@ defmodule Adventofcode.Day13CarePackage do
     defp update_range(n1..n2, n) when n in n1..n2, do: n1..n2
     defp update_range(n1..n2, n) when n < n1, do: n..n2
     defp update_range(n1..n2, n) when n > n2, do: n1..n
+  end
+
+  defmodule Printer do
+    def print(arcade) do
+      IO.puts(s_print(arcade))
+      arcade
+    end
+
+    def s_print(%{view: {_, y1..y2}} = arcade) do
+      y1..y2
+      |> Enum.to_list()
+      |> Enum.map_join("\n", &print_row(arcade, &1))
+    end
+
+    defp print_row(%{view: {x1..x2, _}} = arcade, y) do
+      x1..x2
+      |> Enum.to_list()
+      |> Enum.map(&{&1, y})
+      |> Enum.map_join(&do_print_row(arcade, &1))
+    end
+
+    defp do_print_row(arcade, pos) do
+      print_tile(
+        arcade,
+        pos,
+        ArcadeCabinet.get_panel(arcade, pos),
+        ArcadeCabinet.get_ball(arcade)
+      )
+    end
+
+    defp print_tile(_, {_, _}, :empty, _), do: "  "
+    defp print_tile(_, {_, _}, :wall, _), do: "██"
+    defp print_tile(_, {_, _}, :block, _), do: "▒▒"
+    defp print_tile(_, {_, _}, :horizontal_paddle, _), do: "▁▁"
+    defp print_tile(_, {_, _}, :ball, _), do: "🏐"
   end
 end
