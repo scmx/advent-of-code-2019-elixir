@@ -1,7 +1,7 @@
 defmodule Adventofcode.Day12NBodyProblemTest do
   use Adventofcode.FancyCase
 
-  alias Adventofcode.Day12NBodyProblem.{Parser, Planet, Printer}
+  alias Adventofcode.Day12NBodyProblem.{Parser, Simulation, Printer}
 
   import Adventofcode.Day12NBodyProblem
   import ExUnit.CaptureIO
@@ -40,7 +40,7 @@ defmodule Adventofcode.Day12NBodyProblemTest do
       fun = fn ->
         @input
         |> Parser.parse()
-        |> Planet.simulate_step(1)
+        |> Simulation.run(1)
         |> Printer.print()
       end
 
@@ -58,7 +58,7 @@ defmodule Adventofcode.Day12NBodyProblemTest do
       fun = fn ->
         @input
         |> Parser.parse()
-        |> Planet.simulate_step(10)
+        |> Simulation.run(10)
         |> Printer.print()
       end
 
@@ -66,11 +66,12 @@ defmodule Adventofcode.Day12NBodyProblemTest do
     end
 
     test "total_energy after 10 steps" do
-      assert 179 = @input |> Parser.parse() |> Planet.simulate_step(10) |> Planet.total_energy()
+      assert 179 = @input |> Parser.parse() |> Simulation.run(10) |> Simulation.total_energy()
     end
 
     test "steps until repeat" do
-      assert %Planet{step: 2772} = @input |> Parser.parse() |> Planet.simulate_step_repeat()
+      assert %Simulation{repeats_every: 2772} =
+               @input |> Parser.parse() |> Simulation.run_until_repeat()
     end
   end
 
@@ -82,18 +83,24 @@ defmodule Adventofcode.Day12NBodyProblemTest do
     <x=9, y=-8, z=-3>
     """
     test "total_energy after 100 steps" do
-      assert 1940 = @input |> Parser.parse() |> Planet.simulate_step(100) |> Planet.total_energy()
+      assert 1940 = @input |> Parser.parse() |> Simulation.run(100) |> Simulation.total_energy()
     end
 
-    @tag :skip
     test "steps until repeat" do
-      assert %Planet{step: 0} = @input |> Parser.parse() |> Planet.simulate_step_repeat()
+      assert %Simulation{repeats_every: 4_686_774_924} =
+               @input |> Parser.parse() |> Simulation.run_until_repeat()
     end
   end
 
   describe "part_1/1" do
     test_with_puzzle_input do
       assert 8044 = puzzle_input() |> part_1()
+    end
+  end
+
+  describe "part_2/1" do
+    test_with_puzzle_input do
+      assert 362_375_881_472_136 = puzzle_input() |> part_2()
     end
   end
 end
