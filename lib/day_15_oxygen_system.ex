@@ -12,6 +12,16 @@ defmodule Adventofcode.Day15OxygenSystem do
     |> Map.get(:steps)
   end
 
+  def part_2(input) do
+    input
+    |> Program.parse()
+    |> Maze.new()
+    |> Runner.find_oxygen_system()
+    |> Runner.fill_with_oxygen()
+    |> Map.get(:last_empty)
+    |> Map.get(:steps)
+  end
+
   defmodule Position do
     @enforce_keys [:x, :y]
     defstruct x: 0, y: 0
@@ -104,10 +114,15 @@ defmodule Adventofcode.Day15OxygenSystem do
     @enforce_keys [:droids]
     defstruct tiles: %{Position.new(0, 0) => Tile.empty()},
               droids: [],
-              oxygen_system: nil
+              oxygen_system: nil,
+              last_empty: nil
 
     def new(program) do
       %Maze{droids: [%Droid{program: program}]}
+    end
+
+    def clear_empty_tiles(maze) do
+      %{maze | tiles: maze.tiles |> Enum.filter(&Tile.empty?(elem(&1, 1))) |> Enum.into(%{})}
     end
 
     def tile_visited?(%Maze{tiles: tiles}, position) do
@@ -142,6 +157,11 @@ defmodule Adventofcode.Day15OxygenSystem do
       |> do_add_droid_tile(droid)
     end
 
+    defp add_droid_tile(maze, %{tile: %{type: :empty}} = droid) do
+      %{maze | last_empty: droid}
+      |> do_add_droid_tile(droid)
+    end
+
     defp add_droid_tile(maze, droid) do
       maze
       |> do_add_droid_tile(droid)
@@ -162,6 +182,13 @@ defmodule Adventofcode.Day15OxygenSystem do
 
   defmodule Runner do
     def find_oxygen_system(maze), do: run(maze)
+
+    def fill_with_oxygen(maze) do
+      maze
+      |> Maze.clear_empty_tiles()
+      |> Maze.set_droids([%{maze.oxygen_system | steps: 0}])
+      |> run()
+    end
 
     def run(%{droids: []} = maze), do: maze
 
