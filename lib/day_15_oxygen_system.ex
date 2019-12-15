@@ -1,12 +1,12 @@
 defmodule Adventofcode.Day15OxygenSystem do
   use Adventofcode
 
-  alias __MODULE__.{Direction, Droid, Maze, Position, Program, Runner, Tile}
+  alias __MODULE__.{Direction, Droid, Maze, Position, Printer, Program, Runner, Tile}
 
   def part_1(input) do
     input
     |> Program.parse()
-    |> Maze.new()
+    |> Maze.new(view: {-19..21, -21..19})
     |> Runner.find_oxygen_system()
     |> Map.get(:oxygen_system)
     |> Map.get(:steps)
@@ -15,9 +15,10 @@ defmodule Adventofcode.Day15OxygenSystem do
   def part_2(input) do
     input
     |> Program.parse()
-    |> Maze.new()
+    |> Maze.new(view: {-19..21, -21..19})
     |> Runner.find_oxygen_system()
     |> Runner.fill_with_oxygen()
+    # |> Printer.print()
     |> Map.get(:last_empty)
     |> Map.get(:steps)
   end
@@ -111,14 +112,18 @@ defmodule Adventofcode.Day15OxygenSystem do
   end
 
   defmodule Maze do
+    @default_view {0..0, 0..0}
+
     @enforce_keys [:droids]
     defstruct tiles: %{Position.new(0, 0) => Tile.empty()},
+              view: @default_view,
               droids: [],
               oxygen_system: nil,
               last_empty: nil
 
-    def new(program) do
-      %Maze{droids: [%Droid{program: program}]}
+    def new(program, options) do
+      view = Keyword.get(options, :view, @default_view)
+      %Maze{view: view, droids: [%Droid{program: program}]}
     end
 
     def clear_empty_tiles(maze) do
@@ -169,8 +174,16 @@ defmodule Adventofcode.Day15OxygenSystem do
 
     defp do_add_droid_tile(maze, droid) do
       tiles = Map.put(maze.tiles, droid.position, droid.tile)
-      %{maze | tiles: tiles}
+      %{maze | tiles: tiles, view: update_view(maze.view, droid.position)}
     end
+
+    defp update_view({x1..x2, y1..y2}, %{x: x, y: y}) do
+      {update_range(x1..x2, x), update_range(y1..y2, y)}
+    end
+
+    defp update_range(n1..n2, n) when n in n1..n2, do: n1..n2
+    defp update_range(n1..n2, n) when n < n1, do: n..n2
+    defp update_range(n1..n2, n) when n > n2, do: n1..n
   end
 
   defmodule Explorer do
@@ -207,6 +220,41 @@ defmodule Adventofcode.Day15OxygenSystem do
       |> Enum.reject(&Maze.tile_visited?(maze, Droid.position(&1)))
     end
   end
+
+  defmodule Printer do
+    def print(maze) do
+      IO.puts("\n" <> s_print(maze))
+      maze
+    end
+
+    def s_print(%{view: {_, y1..y2}} = maze) do
+      y1..y2
+      |> Enum.to_list()
+      |> Enum.map_join("\n", &print_row(maze, &1))
+    end
+
+    defp print_row(%{view: {x1..x2, _}} = maze, y) do
+      x1..x2
+      |> Enum.to_list()
+      |> Enum.map(&Position.new(&1, y))
+      |> Enum.map_join(&do_print_row(maze, &1))
+    end
+
+    defp do_print_row(maze, position) do
+      droid = Maze.get_droid(maze, position)
+      print_tile(droid, Maze.get_tile(maze, position))
+    end
+
+    defp print_tile(%Droid{}, _), do: "<>"
+    defp print_tile(nil, nil), do: "  "
+    defp print_tile(nil, %Tile{type: :wall}), do: "██"
+    defp print_tile(nil, %Tile{type: :empty}), do: ".."
+
+    defp print_tile(nil, %Tile{type: :oxygen_system}) do
+      IO.ANSI.format([IO.ANSI.blue(), "██", IO.ANSI.reset()])
+    end
+  end
+end
 
 defimpl Inspect, for: Adventofcode.Day15OxygenSystem.Position do
   import Inspect.Algebra
