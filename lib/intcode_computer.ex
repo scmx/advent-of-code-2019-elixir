@@ -331,3 +331,26 @@ defmodule Adventofcode.IntcodeComputer do
     {outputs(program), %{program | outputs: []}}
   end
 end
+
+defimpl Inspect, for: Adventofcode.IntcodeComputer.Program do
+  import Inspect.Algebra
+
+  def inspect(program, opts) do
+    opts = %Inspect.Opts{opts | charlists: :as_lists}
+
+    concat([
+      "#Program<",
+      to_string(program.status),
+      " (",
+      to_string(program.relative_base),
+      ") ",
+      container_doc("[", inputs(program.inputs, program.fallback_input), "]", opts, &to_doc/2),
+      " => ",
+      to_doc(program.outputs, opts),
+      ">"
+    ])
+  end
+
+  defp inputs(inputs, nil), do: inputs
+  defp inputs(inputs, fallback_input), do: inputs ++ ["(#{fallback_input})"]
+end
