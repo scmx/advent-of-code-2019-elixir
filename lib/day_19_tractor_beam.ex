@@ -1,7 +1,7 @@
 defmodule Adventofcode.Day19TractorBeam do
   use Adventofcode
 
-  alias __MODULE__.{Grid, Position, Program}
+  alias __MODULE__.{Grid, Position, Printer, Program}
 
   def part_1(input) do
     input
@@ -70,5 +70,42 @@ defmodule Adventofcode.Day19TractorBeam do
       |> Enum.filter(&(&1 == 1))
       |> Enum.count()
     end
+  end
+
+  defmodule Printer do
+    def print(grid) do
+      IO.puts("\n" <> s_print(grid))
+      grid
+    end
+
+    def s_print(%{view: {_, y1..y2}} = grid) do
+      y1..y2
+      |> Enum.to_list()
+      |> Enum.map_join("\n", &print_row(grid, &1))
+    end
+
+    defp print_row(%{view: {x1..x2, _}} = grid, y) do
+      x1..x2
+      |> Enum.to_list()
+      |> Enum.map(&Position.new(&1, y))
+      |> Enum.map_join(&do_print_row(grid, &1))
+    end
+
+    defp do_print_row(grid, position) do
+      grid
+      |> Grid.get_location(position)
+      |> print_location()
+    end
+
+    defp print_location(0), do: "."
+    defp print_location(1), do: "#"
+  end
+end
+
+defimpl Inspect, for: Adventofcode.Day19TractorBeam.Position do
+  import Inspect.Algebra
+
+  def inspect(%{x: x, y: y}, _opts) do
+    concat(["#Position{", to_string(x), " ", to_string(y), "}"])
   end
 end
