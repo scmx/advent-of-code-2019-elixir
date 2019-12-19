@@ -140,7 +140,11 @@ defmodule Adventofcode.IntcodeComputer do
     end
 
     def input(program, value) when is_number(value) do
-      %{program | inputs: program.inputs ++ [value]}
+      inputs(program, [value])
+    end
+
+    def inputs(program, values) when is_list(values) do
+      %{program | inputs: program.inputs ++ values}
     end
 
     def fallback_input(program, value) do
@@ -314,8 +318,12 @@ defmodule Adventofcode.IntcodeComputer do
     |> Program.new()
   end
 
-  def input(program, input) do
-    Program.input(program, input)
+  def input(program, value) when is_number(value) do
+    Program.input(program, value)
+  end
+
+  def inputs(program, values) when is_list(values) do
+    Program.inputs(program, values)
   end
 
   def fallback_input(program, input) do
