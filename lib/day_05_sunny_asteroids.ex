@@ -8,7 +8,7 @@ defmodule Adventofcode.Day05SunnyAsteroids do
     input
     |> IntcodeComputer.parse()
     |> Program.input(1)
-    |> Program.input(0)
+    |> Program.fallback_input(nil)
     |> IntcodeComputer.run()
     |> IntcodeComputer.output()
   end
@@ -17,7 +17,7 @@ defmodule Adventofcode.Day05SunnyAsteroids do
     input
     |> IntcodeComputer.parse()
     |> Program.input(5)
-    |> Program.input(0)
+    |> Program.fallback_input(nil)
     |> IntcodeComputer.run()
     |> IntcodeComputer.output()
   end
