@@ -47,7 +47,7 @@ defmodule Adventofcode.Day10MonitoringStation do
   defmodule Printer do
     import IO.ANSI
 
-    def print(asteroids, {x, y}) do
+    def print(asteroids, {_x, _y}) do
       asteroids
     end
 

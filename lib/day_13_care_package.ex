@@ -75,7 +75,7 @@ defmodule Adventofcode.Day13CarePackage do
   end
 
   defmodule Tiles do
-    def put(%{tiles: tiles} = arcade, pos, value) do
+    def put(%ArcadeCabinet{} = arcade, pos, value) do
       tiles = Map.put(arcade.tiles, pos, value)
       %{arcade | tiles: tiles, view: update_view(arcade.view, pos)}
     end
