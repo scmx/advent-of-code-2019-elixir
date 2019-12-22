@@ -1,7 +1,7 @@
 defmodule Adventofcode.Day22SlamShuffle do
   use Adventofcode
 
-  alias __MODULE__.{Deck, Parser}
+  alias __MODULE__.{Deck, Parser, Shuffler}
 
   def part_1(input) do
     input
@@ -9,6 +9,29 @@ defmodule Adventofcode.Day22SlamShuffle do
     |> Deck.new()
     |> Deck.shuffle()
     |> Deck.position_of(2019)
+  end
+
+  defmodule Shuffler do
+    def shuffle(cards, "deal into new stack") do
+      Enum.reverse(cards)
+    end
+
+    def shuffle(cards, "cut " <> n) do
+      n = String.to_integer(n)
+      {upper, lower} = Enum.split(cards, n)
+      lower ++ upper
+    end
+
+    def shuffle(cards, "deal with increment " <> n) do
+      n = String.to_integer(n)
+      pos = &rem(&1 * n, length(cards))
+      reducer = fn {card, index}, acc -> :array.set(pos.(index), card, acc) end
+
+      cards
+      |> Enum.with_index()
+      |> Enum.reduce(:array.new(), reducer)
+      |> :array.to_list()
+    end
   end
 
   defmodule Deck do
@@ -25,31 +48,8 @@ defmodule Adventofcode.Day22SlamShuffle do
     end
 
     def shuffle(deck) do
-      Enum.reduce(deck.instructions, deck, &shuffle(&2, &1))
-    end
-
-    def shuffle(deck, "deal into new stack") do
-      %{deck | cards: Enum.reverse(deck.cards)}
-    end
-
-    def shuffle(deck, "cut " <> n) do
-      n = String.to_integer(n)
-      {upper, lower} = Enum.split(deck.cards, n)
-      %{deck | cards: lower ++ upper}
-    end
-
-    def shuffle(deck, "deal with increment " <> n) do
-      n = String.to_integer(n)
-      pos = &rem(&1 * n, length(deck.cards))
-      reducer = fn {card, index}, acc -> :array.set(pos.(index), card, acc) end
-
-      cards =
-        deck.cards
-        |> Enum.with_index()
-        |> Enum.reduce(:array.new(), reducer)
-        |> :array.to_list()
-
-      %{deck | cards: cards}
+      deck.instructions
+      |> Enum.reduce(deck, &%{&2 | cards: Shuffler.shuffle(&2.cards, &1)})
     end
 
     def to_list(deck), do: deck.cards
