@@ -40,13 +40,16 @@ defmodule Adventofcode.Day22SlamShuffle do
 
     def shuffle(deck, "deal with increment " <> n) do
       n = String.to_integer(n)
+      pos = &rem(&1 * n, length(deck.cards))
+      reducer = fn {card, index}, acc -> :array.set(pos.(index), card, acc) end
 
-      Enum.reduce(Enum.with_index(deck.cards), deck, fn {card, index}, acc ->
-        %{
-          acc
-          | cards: List.update_at(acc.cards, rem(index * n, length(deck.cards)), fn _ -> card end)
-        }
-      end)
+      cards =
+        deck.cards
+        |> Enum.with_index()
+        |> Enum.reduce(:array.new(), reducer)
+        |> :array.to_list()
+
+      %{deck | cards: cards}
     end
 
     def to_list(deck), do: deck.cards
