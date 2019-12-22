@@ -7,43 +7,39 @@ defmodule Adventofcode.Day22SlamShuffleTest do
 
   describe "Deck.shuffle/2" do
     test "deal into new stack" do
-      expected = Enum.to_list(9..0)
-
-      assert %Deck{cards: ^expected} =
+      assert [9, 8, 7, 6, 5, 4, 3, 2, 1, 0] =
                "deal into new stack"
                |> Parser.parse()
                |> Deck.new(0..9)
                |> Deck.shuffle()
+               |> Deck.to_list()
     end
 
     test "cut 3" do
-      expected = [3, 4, 5, 6, 7, 8, 9, 0, 1, 2]
-
-      assert %Deck{cards: ^expected} =
+      assert [3, 4, 5, 6, 7, 8, 9, 0, 1, 2] =
                "cut 3"
                |> Parser.parse()
                |> Deck.new(0..9)
                |> Deck.shuffle()
+               |> Deck.to_list()
     end
 
     test "cut -4" do
-      expected = [6, 7, 8, 9, 0, 1, 2, 3, 4, 5]
-
-      assert %Deck{cards: ^expected} =
+      assert [6, 7, 8, 9, 0, 1, 2, 3, 4, 5] =
                "cut -4"
                |> Parser.parse()
                |> Deck.new(0..9)
                |> Deck.shuffle()
+               |> Deck.to_list()
     end
 
     test "deal with increment 3" do
-      expected = [0, 7, 4, 1, 8, 5, 2, 9, 6, 3]
-
-      assert %Deck{cards: ^expected} =
+      assert [0, 7, 4, 1, 8, 5, 2, 9, 6, 3] =
                "deal with increment 3"
                |> Parser.parse()
                |> Deck.new(0..9)
                |> Deck.shuffle()
+               |> Deck.to_list()
     end
 
     @input """
@@ -52,13 +48,12 @@ defmodule Adventofcode.Day22SlamShuffleTest do
     deal into new stack
     """
     test "deal with increment 7 deal into new stack deal into new stack" do
-      expected = [0, 3, 6, 9, 2, 5, 8, 1, 4, 7]
-
-      assert %Deck{cards: ^expected} =
+      assert [0, 3, 6, 9, 2, 5, 8, 1, 4, 7] =
                @input
                |> Parser.parse()
                |> Deck.new(0..9)
                |> Deck.shuffle()
+               |> Deck.to_list()
     end
 
     @input """
@@ -67,13 +62,12 @@ defmodule Adventofcode.Day22SlamShuffleTest do
     deal into new stack
     """
     test "cut 6 deal with increment 7 deal into new stack" do
-      expected = [3, 0, 7, 4, 1, 8, 5, 2, 9, 6]
-
-      assert %Deck{cards: ^expected} =
+      assert [3, 0, 7, 4, 1, 8, 5, 2, 9, 6] =
                @input
                |> Parser.parse()
                |> Deck.new(0..9)
                |> Deck.shuffle()
+               |> Deck.to_list()
     end
 
     @input """
@@ -82,13 +76,12 @@ defmodule Adventofcode.Day22SlamShuffleTest do
     cut -2
     """
     test "deal with increment 7 deal with increment 9 cut -2" do
-      expected = [6, 3, 0, 7, 4, 1, 8, 5, 2, 9]
-
-      assert %Deck{cards: ^expected} =
+      assert [6, 3, 0, 7, 4, 1, 8, 5, 2, 9] =
                @input
                |> Parser.parse()
                |> Deck.new(0..9)
                |> Deck.shuffle()
+               |> Deck.to_list()
     end
   end
 
