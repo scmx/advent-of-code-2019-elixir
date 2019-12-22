@@ -93,6 +93,7 @@ defmodule Adventofcode.Day22SlamShuffleTest do
   end
 
   describe "part_1/1" do
+    @tag :slow
     test_with_puzzle_input do
       assert 3324 = puzzle_input() |> part_1()
     end
