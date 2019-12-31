@@ -11,7 +11,7 @@ defmodule Adventofcode.Day24PlanetOfDiscordTest do
     ..#..
     #....
     """
-    test "" do
+    test "example a total biodiversity rating of 2129920" do
       assert 2_129_920 = @input |> part_1()
     end
 
