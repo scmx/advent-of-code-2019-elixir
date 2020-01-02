@@ -5,6 +5,7 @@ defmodule Adventofcode.Day24PlanetOfDiscord do
     BiodiversityRating,
     Bugs,
     Parser,
+    Printer,
     Recursive,
     UntilRepeat
   }
@@ -205,6 +206,33 @@ defmodule Adventofcode.Day24PlanetOfDiscord do
       x = rem(index, width)
       y = div(index, width)
       Position.new(x: x, y: y, z: 0)
+    end
+  end
+
+  defmodule Printer do
+    @range 0..4
+
+    def print(bugs) do
+      IO.puts("\n" <> print_layouts(bugs))
+
+      bugs
+    end
+
+    defp print_layouts(bugs) do
+      bugs
+      |> Enum.map(& &1.z)
+      |> MapSet.new()
+      |> Enum.map_join("\n\n", &print_layout(bugs, &1))
+    end
+
+    defp print_layout(bugs, z) do
+      "Depth #{z}:\n" <> Enum.map_join(@range, "\n", &print_row(bugs, &1, z))
+    end
+
+    defp print_row(bugs, y, z) do
+      @range
+      |> Enum.map(&Position.new(x: &1, y: y, z: z))
+      |> Enum.map_join(&if &1 in bugs, do: "#", else: ".")
     end
   end
 end
