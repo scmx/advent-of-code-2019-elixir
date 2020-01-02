@@ -5,6 +5,7 @@ defmodule Adventofcode.Day24PlanetOfDiscord do
     BiodiversityRating,
     Bugs,
     Parser,
+    Recursive,
     UntilRepeat
   }
 
@@ -16,6 +17,13 @@ defmodule Adventofcode.Day24PlanetOfDiscord do
     |> BiodiversityRating.calculate()
   end
 
+  def part_2(input, times \\ 200) do
+    input
+    |> Parser.parse()
+    |> Bugs.new()
+    |> Recursive.step(times)
+    |> Bugs.count_bugs()
+  end
 
   defmodule Direction do
     @enforce_keys [:x, :y]
@@ -103,9 +111,63 @@ defmodule Adventofcode.Day24PlanetOfDiscord do
     end
   end
 
+  defmodule Recursive do
+    def step(bugs, times, done \\ 0)
+    def step(bugs, times, times), do: bugs
+
+    def step(bugs, times, done) do
+      bugs
+      |> Bugs.coordinates()
+      |> Enum.filter(&should_be_bug?(bugs, &1))
+      |> MapSet.new()
+      |> step(times, done + 1)
+    end
+
+    defp should_be_bug?(bugs, position) do
+      position
+      |> neighbours()
+      |> Enum.count(&(&1 in bugs))
+      |> Bugs.should_be_bug?(Bugs.bug?(bugs, position))
+    end
+
+    defp neighbours(%Position{} = position) do
+      Direction.all()
+      |> Enum.flat_map(&move(position, &1))
+      |> Enum.filter(fn %{x: x, y: y} -> x in 0..4 and y in 0..4 end)
+    end
+
+    defp move(%Position{} = old, direction) do
+      position = %{old | x: old.x + direction.x, y: old.y + direction.y}
+
+      cond do
+        middle?(position) -> move_in(position, direction)
+        outside?(position) -> move_out(position)
+        true -> [position]
+      end
+    end
+
+    defp middle?(%Position{x: x, y: y}), do: x == 2 && y == 2
+
+    defp outside?(%Position{x: x, y: y}), do: x not in 0..4 or y not in 0..4
+
+    defp move_in(pos, %{x: 1, y: 0}), do: do_move_in(%{pos | x: 0..0, y: 0..4})
+    defp move_in(pos, %{x: -1, y: 0}), do: do_move_in(%{pos | x: 4..4, y: 0..4})
+    defp move_in(pos, %{x: 0, y: 1}), do: do_move_in(%{pos | x: 0..4, y: 0..0})
+    defp move_in(pos, %{x: 0, y: -1}), do: do_move_in(%{pos | x: 0..4, y: 4..4})
+
+    defp do_move_in(%Position{x: x1..x2, y: y1..y2, z: z} = position) do
+      for x <- x1..x2, y <- y1..y2, do: %{position | x: x, y: y, z: z + 1}
+    end
+
+    defp move_out(%{z: z, x: -1} = pos), do: [%{pos | x: 1, y: 2, z: z - 1}]
+    defp move_out(%{z: z, x: 5} = pos), do: [%{pos | x: 3, y: 2, z: z - 1}]
+    defp move_out(%{z: z, y: -1} = pos), do: [%{pos | x: 2, y: 1, z: z - 1}]
+    defp move_out(%{z: z, y: 5} = pos), do: [%{pos | x: 2, y: 3, z: z - 1}]
+  end
+
   defmodule BiodiversityRating do
     def calculate(bugs) do
-      coordinates
+      coordinates()
       |> Enum.map(&MapSet.member?(bugs, &1))
       |> Enum.map(&serialize/1)
       |> Enum.join()
