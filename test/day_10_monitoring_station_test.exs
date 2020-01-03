@@ -64,7 +64,6 @@ defmodule Adventofcode.Day10MonitoringStationTest do
       assert {{6, 3}, 41} = @input |> best_location()
     end
 
-    @tag :skip
     @input ~h"""
     .#..##.###...#######
     ##.############..##.
@@ -92,39 +91,9 @@ defmodule Adventofcode.Day10MonitoringStationTest do
     end
   end
 
-  describe "blockers/1 finds locations where an asteroid could block sight between a and b" do
-    test "three blockers directly between" do
-      assert [{1, 1}, {2, 2}, {3, 3}] = blockers({0, 0}, {4, 4})
-    end
-
-    test "two blockers directly between" do
-      assert [{1, 1}, {2, 2}] = blockers({0, 0}, {3, 3})
-    end
-
-    test "one blocker directly between" do
-      assert [{1, 1}] = blockers({0, 0}, {2, 2})
-    end
-
-    test "one blocker diagonally between" do
-      assert [{1, 2}] = blockers({0, 0}, {2, 4})
-    end
-
-    test "one blocker more diagonally between" do
-      assert [{1, 3}] = blockers({0, 0}, {2, 6})
-    end
-
-    test "no blockers between" do
-      assert [] = blockers({0, 0}, {2, 1})
-    end
-  end
-
   describe "part_1/1" do
-    # test "" do
-    #   assert 1337 = input |> part_1()
-    # end
-
-    # test_with_puzzle_input do
-    #   assert 1337 = puzzle_input() |> part_1()
-    # end
+    test_with_puzzle_input do
+      assert 314 = puzzle_input() |> part_1()
+    end
   end
 end
