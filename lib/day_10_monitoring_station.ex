@@ -44,42 +44,6 @@ defmodule Adventofcode.Day10MonitoringStation do
     end
   end
 
-  defmodule Printer do
-    import IO.ANSI
-
-    def print(asteroids, {_x, _y}) do
-      asteroids
-    end
-
-    def print_lines({x, y}, asteroids) do
-      0..asteroids.max_y
-      |> Enum.to_list()
-      |> Enum.map_join("\n", &print_line(&1, {x, y}, asteroids))
-    end
-
-    defp print_line(y, pos, asteroids) do
-      0..asteroids.max_x
-      |> Enum.to_list()
-      |> Enum.map_join(&print_pos({&1, y}, pos, asteroids))
-    end
-
-    defp print_pos(pos, pos2, asteroids) do
-      do_print_pos(Asteroids.get(asteroids, pos), Asteroids.get(asteroids, pos2))
-    end
-
-    defp do_print_pos({{_, _}, nil}, {{_, _}, _}), do: "."
-    defp do_print_pos({{_, _}, _}, {{_, _}, nil}), do: "."
-
-    defp do_print_pos({{x, y}, _}, {{x, y}, _}),
-      do: format([blue(), "X", reset()])
-
-    defp do_print_pos({pos, _}, {{_, _}, detected}) do
-      if pos in detected, do: format([green(), "#", reset()]), else: format([red(), "#", reset()])
-    end
-
-    defp do_print_pos({{_, _}, _}, {{_, _}, _}), do: " "
-  end
-
   defmodule Finder do
     def find(asteroids) do
       %{asteroids | data: do_find(asteroids)}
@@ -162,5 +126,42 @@ defmodule Adventofcode.Day10MonitoringStation do
     def parse_location("#", {x, y}, acc) do
       Map.put(acc, {x, y}, nil)
     end
+  end
+
+  defmodule Printer do
+    import IO.ANSI
+
+    def print(asteroids, {x, y}) do
+      IO.puts("\n" <> print_lines({x, y}, asteroids))
+      asteroids
+    end
+
+    defp print_lines({x, y}, asteroids) do
+      0..asteroids.max_y
+      |> Enum.to_list()
+      |> Enum.map_join("\n", &print_line(&1, {x, y}, asteroids))
+    end
+
+    defp print_line(y, pos, asteroids) do
+      0..asteroids.max_x
+      |> Enum.to_list()
+      |> Enum.map_join(&print_pos({&1, y}, pos, asteroids))
+    end
+
+    defp print_pos(pos, pos2, asteroids) do
+      do_print_pos(Asteroids.get(asteroids, pos), Asteroids.get(asteroids, pos2))
+    end
+
+    defp do_print_pos({{_, _}, nil}, {{_, _}, _}), do: "."
+    defp do_print_pos({{_, _}, _}, {{_, _}, nil}), do: "#"
+
+    defp do_print_pos({{x, y}, _}, {{x, y}, _}),
+      do: format([blue(), "X", reset()])
+
+    defp do_print_pos({pos, _}, {{_, _}, detected}) do
+      if pos in detected, do: format([green(), "#", reset()]), else: format([red(), "#", reset()])
+    end
+
+    defp do_print_pos({{_, _}, _}, {{_, _}, _}), do: " "
   end
 end
