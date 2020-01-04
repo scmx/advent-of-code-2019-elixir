@@ -16,12 +16,25 @@ defmodule Adventofcode.Day10MonitoringStation do
     |> elem(1)
   end
 
+  def part_2(input) do
+    {x, y} = input |> vaporization_order() |> Enum.at(200 - 1)
+    x * 100 + y
+  end
+
   def best_location(input) do
     input
     |> Parser.parse()
     |> MonitoringStation.try_all()
     |> BestLocation.find()
     |> BestLocation.reachable_asteroids()
+  end
+
+  def vaporization_order(input) do
+    input
+    |> Parser.parse()
+    |> MonitoringStation.try_all()
+    |> BestLocation.find()
+    |> VaporizationOrder.order()
   end
 
   defmodule Asteroids do
@@ -49,6 +62,25 @@ defmodule Adventofcode.Day10MonitoringStation do
     end
 
     def reachable_asteroids({location, angles}), do: {location, length(angles)}
+  end
+
+  defmodule VaporizationOrder do
+    def order({_location, angles}) do
+      angles
+      |> Enum.sort_by(fn {angle, _asteroids} -> angle end)
+      |> Enum.map(fn {_angle, asteroids} -> asteroids end)
+      |> expand_lists_to_same_length
+      |> List.zip()
+      |> Enum.flat_map(&Tuple.to_list/1)
+      |> Enum.reject(&is_nil/1)
+    end
+
+    defp expand_lists_to_same_length(asteroids_in_angle_order) do
+      max = asteroids_in_angle_order |> Enum.max_by(&length/1) |> length
+
+      asteroids_in_angle_order
+      |> Enum.map(&(&1 ++ List.duplicate(nil, max - length(&1))))
+    end
   end
 
   defmodule MonitoringStation do

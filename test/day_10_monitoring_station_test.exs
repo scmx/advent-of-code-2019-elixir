@@ -118,4 +118,28 @@ defmodule Adventofcode.Day10MonitoringStationTest do
       assert 314 = puzzle_input() |> part_1()
     end
   end
+
+  describe "vaporization_order/1" do
+    @input """
+    .#....###24...#..
+    ##...##.13#67..9#
+    ##...#...5.8####.
+    ..#.....X...###..
+    ..#.#.....#....##
+    """
+    test "first nine asteroids to get vaporized, in order, would be" do
+      v1 = [{8, 1}, {9, 0}, {9, 1}, {10, 0}, {9, 2}, {11, 1}, {12, 1}, {11, 2}, {15, 1}]
+      v2 = [{12, 2}, {13, 2}, {14, 2}, {15, 2}, {12, 3}, {16, 4}, {15, 4}, {10, 4}, {4, 4}]
+      v3 = [{2, 4}, {2, 3}, {0, 2}, {1, 2}, {0, 1}, {1, 1}, {5, 2}, {1, 0}, {5, 1}]
+      v4 = [{6, 1}, {6, 0}, {7, 0}, {8, 0}, {10, 1}, {14, 0}, {16, 1}, {13, 3}, {14, 3}]
+
+      assert v1 ++ v2 ++ v3 ++ v4 == @input |> vaporization_order
+    end
+  end
+
+  describe "part_2/1" do
+    test_with_puzzle_input do
+      assert 1513 = puzzle_input() |> part_2()
+    end
+  end
 end
