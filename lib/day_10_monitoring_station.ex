@@ -1,7 +1,14 @@
 defmodule Adventofcode.Day10MonitoringStation do
   use Adventofcode
 
-  alias __MODULE__.{Asteroids, Finder, Parser}
+  alias __MODULE__.{
+    Asteroids,
+    BestLocation,
+    MonitoringStation,
+    Parser,
+    Printer,
+    VaporizationOrder
+  }
 
   def part_1(input) do
     input
@@ -11,25 +18,19 @@ defmodule Adventofcode.Day10MonitoringStation do
 
   def best_location(input) do
     input
-    |> all_locations()
-    |> Enum.max_by(&elem(&1, 1))
-  end
-
-  defp all_locations(input) do
-    input
     |> Parser.parse()
-    |> Finder.find()
-    |> Map.get(:data)
-    |> Enum.map(&{elem(&1, 0), length(Enum.uniq(elem(&1, 1)))})
+    |> MonitoringStation.try_all()
+    |> BestLocation.find()
+    |> BestLocation.reachable_asteroids()
   end
 
   defmodule Asteroids do
     @enforce_keys [:data, :max_x, :max_y]
     defstruct data: %{}, max_x: 0, max_y: 0
 
-    def locations(asteroids) do
-      Map.keys(asteroids.data)
-    end
+    def all(%Asteroids{data: data}), do: data
+
+    def locations(%Asteroids{data: data}), do: Map.keys(data)
 
     def other_locations(asteroids, {x, y}) do
       locations(asteroids) -- [{x, y}]
@@ -40,8 +41,18 @@ defmodule Adventofcode.Day10MonitoringStation do
     end
   end
 
-  defmodule Finder do
+  defmodule BestLocation do
     def find(asteroids) do
+      asteroids
+      |> Asteroids.all()
+      |> Enum.max_by(&length(elem(&1, 1)))
+    end
+
+    def reachable_asteroids({location, angles}), do: {location, length(angles)}
+  end
+
+  defmodule MonitoringStation do
+    def try_all(asteroids) do
       %{asteroids | data: do_find(asteroids)}
     end
 
@@ -52,23 +63,41 @@ defmodule Adventofcode.Day10MonitoringStation do
       |> Enum.into(%{})
     end
 
-    defp distance({x1, y1}, {x2, y2}) do
-      dx = x2 - x1
-      dy = y2 - y1
-      {dx, dy}
-    end
-
-    defp gcd_distance({dx, dy}) do
-      gcd = Integer.gcd(dx, dy)
-      {trunc(dx / gcd), trunc(dy / gcd)}
-    end
-
     defp detect_asteroids({x1, y1}, asteroids) do
       asteroids
       |> Asteroids.other_locations({x1, y1})
-      |> Enum.map(fn {x2, y2} -> {{x2, y2}, distance({x1, y1}, {x2, y2})} end)
-      |> Enum.sort_by(fn {_, {dx, dy}} -> abs(dx) + abs(dy) end)
-      |> Enum.uniq_by(fn {_, {dx, dy}} -> gcd_distance({dx, dy}) end)
+      |> Enum.group_by(&angle({{x1, y1}, &1}))
+      |> Enum.map(&angle_asteroids_by_distance(&1, {x1, y1}))
+    end
+
+    defp angle_asteroids_by_distance({angle, asteroids}, {x1, y1}) do
+      {angle, Enum.sort_by(asteroids, &manhattan_distance({x1, y1}, &1))}
+    end
+
+    def angle({{x1, y1}, {x2, y2}}) do
+      dx = x2 - x1
+      dy = y2 - y1
+
+      cond do
+        dx == 0 && dy < 0 -> 0
+        dy == 0 && dx > 0 -> 90
+        dx == 0 && dy > 0 -> 180
+        dy == 0 && dx < 0 -> 270
+        true -> do_angle({dx, dy}) + 90
+      end
+    end
+
+    defp do_angle({dx, dy}) do
+      radian = :math.atan(dy / dx)
+
+      case radian * 180 / :math.pi() do
+        degree when dx < 0 -> degree + 180
+        degree -> degree
+      end
+    end
+
+    defp manhattan_distance({x1, y1}, {x2, y2}) do
+      abs(x2 - x1) + abs(y2 - y1)
     end
   end
 
@@ -97,10 +126,9 @@ defmodule Adventofcode.Day10MonitoringStation do
     end
 
     defp parse_location(".", {_, _}, acc), do: acc
-
-    defp parse_location("#", {x, y}, acc) do
-      Map.put(acc, {x, y}, [])
-    end
+    defp parse_location("#", {x, y}, acc), do: Map.put(acc, {x, y}, [])
+    defp parse_location("X", {x, y}, acc), do: Map.put(acc, {x, y}, [])
+    defp parse_location(_num, {x, y}, acc), do: parse_location("#", {x, y}, acc)
   end
 
   defmodule Printer do

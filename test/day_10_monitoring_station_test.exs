@@ -2,7 +2,29 @@ defmodule Adventofcode.Day10MonitoringStationTest do
   use Adventofcode.FancyCase
 
   import Adventofcode.Day10MonitoringStation
-  import Adventofcode.Day10MonitoringStation.Finder
+  import Adventofcode.Day10MonitoringStation.MonitoringStation
+
+  describe "angle/2" do
+    test "foo" do
+      tests = %{
+        0 => [{{2, 3}, {2, 0}}],
+        45 => [{{0, 3}, {3, 0}}],
+        90 => [{{0, 1}, {3, 1}}],
+        135 => [{{0, 1}, {3, 4}}],
+        180 => [{{2, 0}, {2, 3}}],
+        225 => [{{3, 1}, {0, 4}}],
+        270 => [{{3, 1}, {0, 1}}],
+        315 => [{{3, 4}, {0, 1}}]
+      }
+
+      Enum.each(tests, fn {angle, cases} ->
+        actual = cases |> Enum.map(&angle/1)
+        expected = angle |> List.duplicate(length(actual))
+
+        assert expected == actual
+      end)
+    end
+  end
 
   describe "best_location/1" do
     @input ~h"""
