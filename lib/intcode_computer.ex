@@ -338,6 +338,10 @@ defmodule Adventofcode.IntcodeComputer do
   def pop_outputs(program) do
     {outputs(program), %{program | outputs: []}}
   end
+
+  def put(program, key, value) do
+    Program.put(program, key, value)
+  end
 end
 
 defimpl Inspect, for: Adventofcode.IntcodeComputer.Program do
