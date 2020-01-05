@@ -3,7 +3,7 @@ defmodule Adventofcode.Day13CarePackage do
 
   alias Adventofcode.IntcodeComputer
 
-  alias __MODULE__.{ArcadeCabinet, CountBlocks, Printer}
+  alias __MODULE__.{ArcadeCabinet, CountBlocks, PaddlesCheat, Printer}
 
   def part_1(input) do
     input
@@ -13,8 +13,37 @@ defmodule Adventofcode.Day13CarePackage do
     |> CountBlocks.count_block_tiles_on_screen()
   end
 
+  def part_2(input) do
+    input
+    |> PaddlesCheat.cheat()
+    |> IntcodeComputer.parse()
+    |> IntcodeComputer.put(0, 2)
+    |> ArcadeCabinet.new()
+    |> ArcadeCabinet.run()
+    |> ArcadeCabinet.score()
+  end
+
+  defmodule PaddlesCheat do
+    def cheat(input) do
+      input
+      |> String.split(",")
+      |> Enum.map(&String.to_integer/1)
+      |> paddles
+    end
+
+    @one 0 |> List.duplicate(41) |> List.replace_at(20, 3)
+    @all 3 |> List.duplicate(41)
+
+    defp paddles(opcodes, result \\ [])
+    defp paddles([], result), do: Enum.reverse(result)
+    defp paddles(@one ++ rest, result), do: paddles(rest, @all ++ result)
+    defp paddles([val | rest], result), do: paddles(rest, [val | result])
+  end
+
   defmodule ArcadeCabinet do
     defstruct tiles: %{}, view: {0..42, 0..22}, program: nil, score: 0
+
+    def score(%ArcadeCabinet{score: score}), do: score
 
     def new(program), do: %ArcadeCabinet{program: program}
 
